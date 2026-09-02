@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 130" role="img" aria-labelledby="title desc">
+  <title id="title">Q Loan</title>
+  <desc id="desc">Qs Loan logo with a yellow Q, teal LOAN lettering, diamond accent, and yellow swoosh.</desc>
+  <g font-family="Georgia, serif" font-weight="700" font-style="italic">
+    <text x="8" y="92" font-size="112" fill="#f7db16" stroke="#111" stroke-width="5" paint-order="stroke">Q</text>
+    <text x="89" y="105" font-size="62" fill="#f7db16" stroke="#111" stroke-width="3" paint-order="stroke">s</text>
+  </g>
+  <g fill="#16856f" stroke="#111" stroke-width="2" paint-order="stroke" font-family="Arial, sans-serif" font-size="73" font-weight="800">
+    <text x="167" y="82" letter-spacing="-3">LOAN</text>
+  </g>
+  <path d="M97 103 C150 96 185 110 239 111 C302 113 361 111 421 105 C360 123 271 127 202 120 C156 116 126 107 97 103Z" fill="#f7db16" stroke="#111" stroke-width="3"/>
+  <path d="M118 20 L142 7 L164 19 L155 43 L131 51 L112 35Z" fill="#f2f2f2" stroke="#111" stroke-width="3"/>
+  <path d="M119 21 L141 31 L155 43 M141 31 L142 8 M141 31 L131 51" fill="none" stroke="#8b8b8b" stroke-width="1.5"/>
+</svg>
