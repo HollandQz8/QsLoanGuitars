@@ -18,12 +18,18 @@ const additionalImages = [
   'https://images.unsplash.com/photo-1532294220147-279b6b3a6a78?auto=format&fit=crop&w=800&q=85'
 ];
 const conditions = ['Excellent', 'Excellent', 'Very good', 'Excellent', 'Good', 'Very good', 'Excellent', 'Excellent', 'Excellent'];
+const listedDates = ['2026-08-25', '2026-08-18', '2026-08-29', '2026-08-31', '2026-08-21', '2026-08-14', '2026-08-27', '2026-08-23', '2026-09-01'];
+const viewCounts = [184, 239, 316, 128, 207, 161, 276, 198, 352];
+const recommendedOrder = [0, 2, 3, 8, 6, 1, 4, 7, 5];
 const uniformGuitarImage = 'https://images.unsplash.com/photo-1556449895-a33c9dba33dd?auto=format&fit=crop&w=800&q=85';
 guitars.forEach((guitar, index) => {
   guitar.inventoryNumber = `QLG-${String(index + 1).padStart(3, '0')}`;
   guitar.condition = conditions[index];
   guitar.image = uniformGuitarImage;
   guitar.images = Array(6).fill(uniformGuitarImage);
+  guitar.listedAt = listedDates[index];
+  guitar.views = viewCounts[index];
+  guitar.recommendedRank = recommendedOrder.indexOf(index);
 });
 
 const card = guitar => `<article class="guitar-card" tabindex="0" data-model="${guitar.model}"><div class="guitar-photo"><img src="${guitar.image}" alt="${guitar.brand} ${guitar.model}" loading="lazy"><span class="availability">${guitar.status}</span></div><div class="guitar-info"><div><h3>${guitar.model}</h3><p>${guitar.brand} · ${guitar.type}</p></div><div class="price">${guitar.price}</div></div><div class="card-actions"><button class="card-buy" type="button">Buy now <span>↗</span></button><button class="card-contact" type="button">Ask a question <span>→</span></button></div></article>`;
@@ -31,8 +37,18 @@ const featuredGrid = document.querySelector('#featured-grid');
 const inventoryGrid = document.querySelector('#inventory-grid');
 featuredGrid.innerHTML = guitars.slice(0, 3).map(card).join('');
 
-function renderInventory(brand = 'All') {
-  const filtered = brand === 'All' ? guitars : guitars.filter(guitar => guitar.brand === brand);
+let selectedBrand = 'All';
+let selectedSort = 'recommended';
+function renderInventory() {
+  const filtered = selectedBrand === 'All' ? [...guitars] : guitars.filter(guitar => guitar.brand === selectedBrand);
+  const sorters = {
+    recommended: (first, second) => first.recommendedRank - second.recommendedRank,
+    'price-low': (first, second) => parseInt(first.price.replace(/[$,]/g, ''), 10) - parseInt(second.price.replace(/[$,]/g, ''), 10),
+    'price-high': (first, second) => parseInt(second.price.replace(/[$,]/g, ''), 10) - parseInt(first.price.replace(/[$,]/g, ''), 10),
+    newest: (first, second) => new Date(second.listedAt) - new Date(first.listedAt),
+    viewed: (first, second) => second.views - first.views
+  };
+  filtered.sort(sorters[selectedSort]);
   inventoryGrid.innerHTML = filtered.map(card).join('');
 }
 renderInventory();
@@ -110,8 +126,13 @@ document.querySelectorAll('.brand-tab').forEach(tab => tab.addEventListener('cli
   document.querySelectorAll('.brand-tab').forEach(item => { item.classList.remove('active'); item.setAttribute('aria-selected', 'false'); });
   tab.classList.add('active');
   tab.setAttribute('aria-selected', 'true');
-  renderInventory(tab.dataset.brand);
+  selectedBrand = tab.dataset.brand;
+  renderInventory();
 }));
+document.querySelector('#inventory-sort').addEventListener('change', event => {
+  selectedSort = event.target.value;
+  renderInventory();
+});
 
 const views = document.querySelectorAll('.view');
 const navLinks = document.querySelectorAll('.nav-link');
