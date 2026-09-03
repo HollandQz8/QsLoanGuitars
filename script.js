@@ -24,6 +24,8 @@ const recommendedOrder = [0, 2, 3, 8, 6, 1, 4, 7, 5];
 const uniformGuitarImage = 'https://images.unsplash.com/photo-1556449895-a33c9dba33dd?auto=format&fit=crop&w=800&q=85';
 guitars.forEach((guitar, index) => {
   guitar.inventoryNumber = `QLG-${String(index + 1).padStart(3, '0')}`;
+  guitar.serialNumber = `SN-QLG-${String(index + 1).padStart(3, '0')}`;
+  guitar.sold = false;
   guitar.condition = conditions[index];
   guitar.image = uniformGuitarImage;
   guitar.images = Array(6).fill(uniformGuitarImage);
@@ -167,7 +169,13 @@ const inventorySheet = document.querySelector('#inventory-sheet');
 const inventoryPassword = document.querySelector('#inventory-password');
 const inventoryLoginStatus = document.querySelector('#inventory-login-status');
 function renderPrivateInventory() {
-  document.querySelector('#inventory-table-body').innerHTML = guitars.map(guitar => `<tr><td>${guitar.inventoryNumber}</td><td>${guitar.price}</td><td>${guitar.brand}</td><td>${guitar.condition}</td><td>${guitar.description}</td><td>${guitar.color}</td></tr>`).join('');
+  document.querySelector('#inventory-table-body').innerHTML = guitars.map((guitar, index) => `<tr><td>${guitar.serialNumber}</td><td>${guitar.inventoryNumber}</td><td><label class="sold-toggle"><input type="checkbox" data-sold-index="${index}"${guitar.sold ? ' checked' : ''}><span>${guitar.sold ? 'Sold' : 'Available'}</span></label></td><td>${guitar.price}</td><td>${guitar.brand}</td><td>${guitar.condition}</td><td>${guitar.description}</td><td>${guitar.color}</td></tr>`).join('');
+  document.querySelectorAll('[data-sold-index]').forEach(input => input.addEventListener('change', event => {
+    const guitar = guitars[Number(event.target.dataset.soldIndex)];
+    guitar.sold = event.target.checked;
+    event.target.nextElementSibling.textContent = guitar.sold ? 'Sold' : 'Available';
+    sessionStorage.setItem('inventorySold', JSON.stringify(guitars.map(item => item.sold)));
+  }));
 }
 function unlockInventory() {
   if (inventoryPassword.value === '2608') {
@@ -186,6 +194,9 @@ function lockInventory() {
 document.querySelector('#inventory-login-button').addEventListener('click', unlockInventory);
 inventoryPassword.addEventListener('keydown', event => { if (event.key === 'Enter') unlockInventory(); });
 document.querySelector('#inventory-lock').addEventListener('click', lockInventory);
+renderPrivateInventory();
+const savedSoldStatus = JSON.parse(sessionStorage.getItem('inventorySold') || '[]');
+savedSoldStatus.forEach((sold, index) => { if (guitars[index]) guitars[index].sold = sold; });
 renderPrivateInventory();
 if (sessionStorage.getItem('inventoryUnlocked') === 'true') { inventoryLogin.hidden = true; inventorySheet.hidden = false; }
 
