@@ -18,10 +18,12 @@ const additionalImages = [
   'https://images.unsplash.com/photo-1532294220147-279b6b3a6a78?auto=format&fit=crop&w=800&q=85'
 ];
 const conditions = ['Excellent', 'Excellent', 'Very good', 'Excellent', 'Good', 'Very good', 'Excellent', 'Excellent', 'Excellent'];
+const uniformGuitarImage = 'https://images.unsplash.com/photo-1556449895-a33c9dba33dd?auto=format&fit=crop&w=800&q=85';
 guitars.forEach((guitar, index) => {
   guitar.inventoryNumber = `QLG-${String(index + 1).padStart(3, '0')}`;
   guitar.condition = conditions[index];
-  guitar.images = [guitar.image, ...additionalImages.map((_, imageIndex) => additionalImages[(index + imageIndex) % additionalImages.length])];
+  guitar.image = uniformGuitarImage;
+  guitar.images = Array(6).fill(uniformGuitarImage);
 });
 
 const card = guitar => `<article class="guitar-card" tabindex="0" data-model="${guitar.model}"><div class="guitar-photo"><img src="${guitar.image}" alt="${guitar.brand} ${guitar.model}" loading="lazy"><span class="availability">${guitar.status}</span></div><div class="guitar-info"><div><h3>${guitar.model}</h3><p>${guitar.brand} · ${guitar.type}</p></div><div class="price">${guitar.price}</div></div><button class="card-contact" type="button">Contact us <span>↗</span></button></article>`;
