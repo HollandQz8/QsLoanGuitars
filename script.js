@@ -68,10 +68,37 @@ const contactMessage = document.querySelector('#message');
 const guitarInterest = document.querySelector('#guitar-interest');
 const modalImage = document.querySelector('#modal-image');
 let imageZoom = 1;
+let imagePanX = 0;
+let imagePanY = 0;
+let panStartX = 0;
+let panStartY = 0;
+let isPanning = false;
 function setImageZoom(zoom) {
   imageZoom = Math.min(3, Math.max(1, zoom));
-  modalImage.style.transform = `scale(${imageZoom})`;
+  if (imageZoom === 1) { imagePanX = 0; imagePanY = 0; }
+  modalImage.style.transform = `translate(${imagePanX}px, ${imagePanY}px) scale(${imageZoom})`;
+  modalImage.classList.toggle('is-zoomed', imageZoom > 1);
   document.querySelector('#zoom-reset').textContent = `${Math.round(imageZoom * 100)}%`;
+}
+function startImagePan(event) {
+  if (imageZoom === 1) return;
+  isPanning = true;
+  panStartX = event.clientX - imagePanX;
+  panStartY = event.clientY - imagePanY;
+  modalImage.setPointerCapture(event.pointerId);
+  modalImage.classList.add('is-panning');
+}
+function moveImagePan(event) {
+  if (!isPanning) return;
+  imagePanX = event.clientX - panStartX;
+  imagePanY = event.clientY - panStartY;
+  modalImage.style.transform = `translate(${imagePanX}px, ${imagePanY}px) scale(${imageZoom})`;
+}
+function stopImagePan(event) {
+  if (!isPanning) return;
+  isPanning = false;
+  if (modalImage.hasPointerCapture(event.pointerId)) modalImage.releasePointerCapture(event.pointerId);
+  modalImage.classList.remove('is-panning');
 }
 let selectedGuitar;
 let checkoutGuitar;
@@ -140,6 +167,10 @@ document.querySelectorAll('[data-close-modal]').forEach(element => element.addEv
 document.querySelector('#zoom-in').addEventListener('click', () => setImageZoom(imageZoom + .25));
 document.querySelector('#zoom-out').addEventListener('click', () => setImageZoom(imageZoom - .25));
 document.querySelector('#zoom-reset').addEventListener('click', () => setImageZoom(1));
+modalImage.addEventListener('pointerdown', startImagePan);
+modalImage.addEventListener('pointermove', moveImagePan);
+modalImage.addEventListener('pointerup', stopImagePan);
+modalImage.addEventListener('pointercancel', stopImagePan);
 document.querySelector('#modal-buy').addEventListener('click', () => { closeGuitarModal(); goToCheckout(selectedGuitar.model); });
 document.querySelector('#modal-contact').addEventListener('click', () => { closeGuitarModal(); goToContact(selectedGuitar.model); });
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && !modal.hidden) closeGuitarModal(); });
