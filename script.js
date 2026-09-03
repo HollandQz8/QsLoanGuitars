@@ -66,6 +66,13 @@ renderInventory();
 const modal = document.querySelector('#guitar-modal');
 const contactMessage = document.querySelector('#message');
 const guitarInterest = document.querySelector('#guitar-interest');
+const modalImage = document.querySelector('#modal-image');
+let imageZoom = 1;
+function setImageZoom(zoom) {
+  imageZoom = Math.min(3, Math.max(1, zoom));
+  modalImage.style.transform = `scale(${imageZoom})`;
+  document.querySelector('#zoom-reset').textContent = `${Math.round(imageZoom * 100)}%`;
+}
 let selectedGuitar;
 let checkoutGuitar;
 function goToCheckout(model) {
@@ -87,8 +94,9 @@ function goToContact(model) {
 function openGuitarModal(model) {
   selectedGuitar = allGuitars.find(guitar => guitar.model === model);
   if (!selectedGuitar) return;
-  document.querySelector('#modal-image').src = selectedGuitar.images[0];
-  document.querySelector('#modal-image').alt = `${selectedGuitar.brand} ${selectedGuitar.model}`;
+  modalImage.src = selectedGuitar.images[0];
+  modalImage.alt = `${selectedGuitar.brand} ${selectedGuitar.model}`;
+  setImageZoom(1);
   document.querySelector('#modal-kicker').textContent = `${selectedGuitar.brand} · ${selectedGuitar.type}`;
   document.querySelector('#modal-title').textContent = selectedGuitar.model;
   document.querySelector('#modal-description').textContent = selectedGuitar.description;
@@ -100,7 +108,8 @@ function openGuitarModal(model) {
   document.querySelector('#modal-details').textContent = selectedGuitar.details;
   document.querySelector('#modal-thumbnails').innerHTML = selectedGuitar.images.map((image, index) => `<button class="modal-thumbnail${index === 0 ? ' active' : ''}" type="button" aria-label="View photo ${index + 1}"><img src="${image}" alt=""></button>`).join('');
   document.querySelectorAll('.modal-thumbnail').forEach((thumbnail, index) => thumbnail.addEventListener('click', () => {
-    document.querySelector('#modal-image').src = selectedGuitar.images[index];
+    modalImage.src = selectedGuitar.images[index];
+    setImageZoom(1);
     document.querySelectorAll('.modal-thumbnail').forEach(item => item.classList.remove('active'));
     thumbnail.classList.add('active');
   }));
@@ -128,6 +137,9 @@ document.querySelectorAll('.guitar-grid, .inventory-grid').forEach(grid => grid.
   if (guitarCard && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); openGuitarModal(guitarCard.dataset.model); }
 }));
 document.querySelectorAll('[data-close-modal]').forEach(element => element.addEventListener('click', closeGuitarModal));
+document.querySelector('#zoom-in').addEventListener('click', () => setImageZoom(imageZoom + .25));
+document.querySelector('#zoom-out').addEventListener('click', () => setImageZoom(imageZoom - .25));
+document.querySelector('#zoom-reset').addEventListener('click', () => setImageZoom(1));
 document.querySelector('#modal-buy').addEventListener('click', () => { closeGuitarModal(); goToCheckout(selectedGuitar.model); });
 document.querySelector('#modal-contact').addEventListener('click', () => { closeGuitarModal(); goToContact(selectedGuitar.model); });
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && !modal.hidden) closeGuitarModal(); });
