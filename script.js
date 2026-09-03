@@ -10,6 +10,20 @@ const guitars = [
   {brand:'Fender', model:'Vintera II 60s Jazzmaster', year:'2023', color:'Lake placid blue', type:'Electric · 2023', price:'$1,099', image:'https://images.unsplash.com/photo-1558098329-a11cff621064?auto=format&fit=crop&w=800&q=85', status:'Available', description:'Surf-inspired shape, wide tonal range, and a wonderfully expressive tremolo make this Jazzmaster a joy to explore.', details:'Alder body, vintage-style 60s pickups, maple neck, and rhythm/lead circuit.'}
 ];
 
+const additionalImages = [
+  'https://images.unsplash.com/photo-1526040652367-ac003a0475fe?auto=format&fit=crop&w=800&q=85',
+  'https://images.unsplash.com/photo-1556449895-a33c9dba33dd?auto=format&fit=crop&w=800&q=85',
+  'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=85',
+  'https://images.unsplash.com/photo-1499415475580-3b20a7a103f0?auto=format&fit=crop&w=800&q=85',
+  'https://images.unsplash.com/photo-1532294220147-279b6b3a6a78?auto=format&fit=crop&w=800&q=85'
+];
+const conditions = ['Excellent', 'Excellent', 'Very good', 'Excellent', 'Good', 'Very good', 'Excellent', 'Excellent', 'Excellent'];
+guitars.forEach((guitar, index) => {
+  guitar.inventoryNumber = `QLG-${String(index + 1).padStart(3, '0')}`;
+  guitar.condition = conditions[index];
+  guitar.images = [guitar.image, ...additionalImages.map((_, imageIndex) => additionalImages[(index + imageIndex) % additionalImages.length])];
+});
+
 const card = guitar => `<article class="guitar-card" tabindex="0" data-model="${guitar.model}"><div class="guitar-photo"><img src="${guitar.image}" alt="${guitar.brand} ${guitar.model}" loading="lazy"><span class="availability">${guitar.status}</span></div><div class="guitar-info"><div><h3>${guitar.model}</h3><p>${guitar.brand} · ${guitar.type}</p></div><div class="price">${guitar.price}</div></div><button class="card-contact" type="button">Contact us <span>↗</span></button></article>`;
 const featuredGrid = document.querySelector('#featured-grid');
 const inventoryGrid = document.querySelector('#inventory-grid');
@@ -34,7 +48,7 @@ function goToContact(model) {
 function openGuitarModal(model) {
   selectedGuitar = guitars.find(guitar => guitar.model === model);
   if (!selectedGuitar) return;
-  document.querySelector('#modal-image').src = selectedGuitar.image;
+  document.querySelector('#modal-image').src = selectedGuitar.images[0];
   document.querySelector('#modal-image').alt = `${selectedGuitar.brand} ${selectedGuitar.model}`;
   document.querySelector('#modal-kicker').textContent = `${selectedGuitar.brand} · ${selectedGuitar.type}`;
   document.querySelector('#modal-title').textContent = selectedGuitar.model;
@@ -45,6 +59,12 @@ function openGuitarModal(model) {
   document.querySelector('#modal-make').textContent = selectedGuitar.brand;
   document.querySelector('#modal-color').textContent = selectedGuitar.color;
   document.querySelector('#modal-details').textContent = selectedGuitar.details;
+  document.querySelector('#modal-thumbnails').innerHTML = selectedGuitar.images.map((image, index) => `<button class="modal-thumbnail${index === 0 ? ' active' : ''}" type="button" aria-label="View photo ${index + 1}"><img src="${image}" alt=""></button>`).join('');
+  document.querySelectorAll('.modal-thumbnail').forEach((thumbnail, index) => thumbnail.addEventListener('click', () => {
+    document.querySelector('#modal-image').src = selectedGuitar.images[index];
+    document.querySelectorAll('.modal-thumbnail').forEach(item => item.classList.remove('active'));
+    thumbnail.classList.add('active');
+  }));
   modal.hidden = false;
   document.body.classList.add('modal-open');
   document.querySelector('.modal-close').focus();
@@ -78,7 +98,7 @@ document.querySelectorAll('.brand-tab').forEach(tab => tab.addEventListener('cli
 const views = document.querySelectorAll('.view');
 const navLinks = document.querySelectorAll('.nav-link');
 function showView(viewName) {
-  const target = viewName === 'inventory' ? 'inventory' : viewName === 'contact' ? 'contact' : 'home';
+  const target = ['inventory', 'contact', 'staff-inventory'].includes(viewName) ? viewName : 'home';
   views.forEach(view => { view.hidden = view.id !== target; });
   navLinks.forEach(link => link.classList.toggle('active', link.dataset.view === target));
   window.scrollTo({top: 0, behavior: 'smooth'});
@@ -94,6 +114,33 @@ document.querySelector('.menu-toggle').addEventListener('click', event => {
   nav.classList.toggle('open');
 });
 document.querySelectorAll('.main-nav a').forEach(link => link.addEventListener('click', () => document.querySelector('.main-nav').classList.remove('open')));
+
+const inventoryLogin = document.querySelector('#inventory-login');
+const inventorySheet = document.querySelector('#inventory-sheet');
+const inventoryPassword = document.querySelector('#inventory-password');
+const inventoryLoginStatus = document.querySelector('#inventory-login-status');
+function renderPrivateInventory() {
+  document.querySelector('#inventory-table-body').innerHTML = guitars.map(guitar => `<tr><td>${guitar.inventoryNumber}</td><td>${guitar.price}</td><td>${guitar.brand}</td><td>${guitar.condition}</td><td>${guitar.description}</td><td>${guitar.color}</td></tr>`).join('');
+}
+function unlockInventory() {
+  if (inventoryPassword.value === '2608') {
+    inventoryLogin.hidden = true;
+    inventorySheet.hidden = false;
+    sessionStorage.setItem('inventoryUnlocked', 'true');
+    inventoryLoginStatus.textContent = '';
+  } else inventoryLoginStatus.textContent = 'That password is not correct.';
+}
+function lockInventory() {
+  inventoryLogin.hidden = false;
+  inventorySheet.hidden = true;
+  inventoryPassword.value = '';
+  sessionStorage.removeItem('inventoryUnlocked');
+}
+document.querySelector('#inventory-login-button').addEventListener('click', unlockInventory);
+inventoryPassword.addEventListener('keydown', event => { if (event.key === 'Enter') unlockInventory(); });
+document.querySelector('#inventory-lock').addEventListener('click', lockInventory);
+renderPrivateInventory();
+if (sessionStorage.getItem('inventoryUnlocked') === 'true') { inventoryLogin.hidden = true; inventorySheet.hidden = false; }
 
 document.querySelector('#contact-form').addEventListener('submit', event => {
   event.preventDefault();
