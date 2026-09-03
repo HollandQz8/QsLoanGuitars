@@ -145,7 +145,7 @@ document.querySelector('#inventory-sort').addEventListener('change', event => {
 const views = document.querySelectorAll('.view');
 const navLinks = document.querySelectorAll('.nav-link');
 function showView(viewName) {
-  const target = ['inventory', 'clearance', 'contact', 'staff-inventory', 'checkout'].includes(viewName) ? viewName : 'home';
+  const target = ['inventory', 'clearance', 'service', 'contact', 'staff-inventory', 'checkout'].includes(viewName) ? viewName : 'home';
   views.forEach(view => { view.hidden = view.id !== target; });
   navLinks.forEach(link => link.classList.toggle('active', link.dataset.view === target));
   window.scrollTo({top: 0, behavior: 'smooth'});
