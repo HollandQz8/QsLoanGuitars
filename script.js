@@ -194,7 +194,6 @@ function lockInventory() {
 document.querySelector('#inventory-login-button').addEventListener('click', unlockInventory);
 inventoryPassword.addEventListener('keydown', event => { if (event.key === 'Enter') unlockInventory(); });
 document.querySelector('#inventory-lock').addEventListener('click', lockInventory);
-renderPrivateInventory();
 const savedSoldStatus = JSON.parse(sessionStorage.getItem('inventorySold') || '[]');
 savedSoldStatus.forEach((sold, index) => { if (guitars[index]) guitars[index].sold = sold; });
 renderPrivateInventory();
