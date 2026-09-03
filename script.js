@@ -32,15 +32,13 @@ guitars.forEach((guitar, index) => {
   guitar.recommendedRank = recommendedOrder.indexOf(index);
 });
 
-const clearanceGuitars = Array.from({length: 20}, (_, index) => {
+const clearanceGuitars = Array.from({length: 10}, (_, index) => {
   const source = guitars[index % guitars.length];
-  const originalPrice = parseInt(source.price.replace(/[$,]/g, ''), 10);
-  const salePrice = Math.round(originalPrice * (index % 3 === 0 ? .7 : index % 3 === 1 ? .75 : .8));
-  return {...source, model: `${source.model} - Clearance ${String(index + 1).padStart(2, '0')}`, price: `$${salePrice.toLocaleString('en-US')}`, originalPrice: source.price, status: 'Clearance', inventoryNumber: `CLR-${String(index + 1).padStart(3, '0')}`};
+  return {...source, model: `${source.model} - Clearance ${String(index + 1).padStart(2, '0')}`, price: '$500', originalPrice: '$1,000', status: 'Clearance', inventoryNumber: `CLR-${String(index + 1).padStart(3, '0')}`};
 });
 const allGuitars = [...guitars, ...clearanceGuitars];
 
-const card = guitar => `<article class="guitar-card" tabindex="0" data-model="${guitar.model}"><div class="guitar-photo"><img src="${guitar.image}" alt="${guitar.brand} ${guitar.model}" loading="lazy"><span class="availability">${guitar.status}</span></div><div class="guitar-info"><div><h3>${guitar.model}</h3><p>${guitar.brand} · ${guitar.type}</p></div><div class="price">${guitar.price}</div></div><div class="card-actions"><button class="card-buy" type="button">Buy now <span>↗</span></button><button class="card-contact" type="button">Ask a question <span>→</span></button></div></article>`;
+const card = guitar => `<article class="guitar-card" tabindex="0" data-model="${guitar.model}"><div class="guitar-photo"><img src="${guitar.image}" alt="${guitar.brand} ${guitar.model}" loading="lazy"><span class="availability">${guitar.status}</span></div><div class="guitar-info"><div><h3>${guitar.model}</h3><p>${guitar.brand} · ${guitar.type}</p></div><div class="price">${guitar.originalPrice ? `<del>${guitar.originalPrice}</del> ${guitar.price}` : guitar.price}</div></div><div class="card-actions"><button class="card-buy" type="button">Buy now <span>↗</span></button><button class="card-contact" type="button">Ask a question <span>→</span></button></div></article>`;
 const featuredGrid = document.querySelector('#featured-grid');
 const inventoryGrid = document.querySelector('#inventory-grid');
 const clearanceGrid = document.querySelector('#clearance-grid');
