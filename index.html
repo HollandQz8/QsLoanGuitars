@@ -81,6 +81,14 @@
       </div>
     </section>
 
+    <section id="checkout" class="view checkout-view" hidden>
+      <div class="checkout-heading"><p class="eyebrow">Secure order request</p><h1>Make it<br><em>yours.</em></h1><p>Complete your details and we will confirm availability, shipping, and payment with you.</p></div>
+      <div class="checkout-grid">
+        <div class="checkout-summary"><p class="form-kicker">Your guitar</p><img id="checkout-image" src="" alt=""><div class="checkout-summary-copy"><p id="checkout-brand"></p><h2 id="checkout-model">Select a guitar</h2><strong id="checkout-price"></strong></div></div>
+        <form class="checkout-form" id="checkout-form"><p class="form-kicker">Checkout details</p><label for="checkout-name">Full name</label><input id="checkout-name" name="name" type="text" autocomplete="name" required><label for="checkout-email">Email</label><input id="checkout-email" name="email" type="email" autocomplete="email" required><label for="checkout-phone">Phone number</label><input id="checkout-phone" name="phone" type="tel" autocomplete="tel" required><label for="checkout-address">Shipping or pickup details</label><textarea id="checkout-address" name="address" rows="4" required></textarea><button class="button button-dark" type="submit">Place order request <span>↗</span></button><p class="form-status" aria-live="polite"></p></form>
+      </div>
+    </section>
+
     <section id="contact" class="view contact-view" hidden>
       <div class="contact-grid">
         <div class="contact-copy"><p class="eyebrow">Come say hello</p><h1>Let's find the<br><em>right fit.</em></h1><p>Tell us what you are looking for, or just come play for a while. There is no wrong question and no hard sell.</p><div class="contact-details"><div><span class="detail-icon">⌂</span><p><strong>Visit the shop</strong><br>2608 Route 37 East<br>New Jersey, Toms River 08753</p></div><div><span class="detail-icon">◷</span><p><strong>Shop hours</strong><br>Mon–Fri, 10am–6pm<br>Saturday 10am-1pm <br> Sunday Closed </p></div><div><span class="detail-icon">@</span><p><strong>Reach us</strong><br><a href="mailto:info@qsloan.com">info@qsloan.net</a><br><a href="tel:+7325067676">(732) 506-7676</a></p></div></div></div>
@@ -94,7 +102,7 @@
     <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <button class="modal-close" type="button" aria-label="Close guitar details" data-close-modal>×</button>
       <div class="modal-gallery"><div class="modal-image"><img id="modal-image" src="" alt=""></div><div class="modal-thumbnails" id="modal-thumbnails"></div></div>
-      <div class="modal-content"><p class="eyebrow" id="modal-kicker"></p><h2 id="modal-title"></h2><p class="modal-description" id="modal-description"></p><div class="modal-meta"><span>Guitar price</span><strong id="modal-price"></strong></div><div class="insights"><p class="insights-title">Guitar insights</p><dl><div><dt>Year</dt><dd id="modal-year"></dd></div><div><dt>Model</dt><dd id="modal-model"></dd></div><div><dt>Make</dt><dd id="modal-make"></dd></div><div><dt>Color</dt><dd id="modal-color"></dd></div><div class="insight-wide"><dt>Details</dt><dd id="modal-details"></dd></div></dl></div><button class="button button-dark modal-contact" type="button" id="modal-contact">Contact us about this guitar <span>↗</span></button></div>
+      <div class="modal-content"><p class="eyebrow" id="modal-kicker"></p><h2 id="modal-title"></h2><p class="modal-description" id="modal-description"></p><div class="modal-meta"><span>Guitar price</span><strong id="modal-price"></strong></div><div class="insights"><p class="insights-title">Guitar insights</p><dl><div><dt>Year</dt><dd id="modal-year"></dd></div><div><dt>Model</dt><dd id="modal-model"></dd></div><div><dt>Make</dt><dd id="modal-make"></dd></div><div><dt>Color</dt><dd id="modal-color"></dd></div><div class="insight-wide"><dt>Details</dt><dd id="modal-details"></dd></div></dl></div><div class="modal-actions"><button class="button button-dark" type="button" id="modal-buy">Buy now <span>↗</span></button><button class="text-link" type="button" id="modal-contact">Ask a question <span>→</span></button></div></div>
     </div>
   </div>
 

@@ -26,7 +26,7 @@ guitars.forEach((guitar, index) => {
   guitar.images = Array(6).fill(uniformGuitarImage);
 });
 
-const card = guitar => `<article class="guitar-card" tabindex="0" data-model="${guitar.model}"><div class="guitar-photo"><img src="${guitar.image}" alt="${guitar.brand} ${guitar.model}" loading="lazy"><span class="availability">${guitar.status}</span></div><div class="guitar-info"><div><h3>${guitar.model}</h3><p>${guitar.brand} · ${guitar.type}</p></div><div class="price">${guitar.price}</div></div><button class="card-contact" type="button">Contact us <span>↗</span></button></article>`;
+const card = guitar => `<article class="guitar-card" tabindex="0" data-model="${guitar.model}"><div class="guitar-photo"><img src="${guitar.image}" alt="${guitar.brand} ${guitar.model}" loading="lazy"><span class="availability">${guitar.status}</span></div><div class="guitar-info"><div><h3>${guitar.model}</h3><p>${guitar.brand} · ${guitar.type}</p></div><div class="price">${guitar.price}</div></div><div class="card-actions"><button class="card-buy" type="button">Buy now <span>↗</span></button><button class="card-contact" type="button">Ask a question <span>→</span></button></div></article>`;
 const featuredGrid = document.querySelector('#featured-grid');
 const inventoryGrid = document.querySelector('#inventory-grid');
 featuredGrid.innerHTML = guitars.slice(0, 3).map(card).join('');
@@ -41,6 +41,17 @@ const modal = document.querySelector('#guitar-modal');
 const contactMessage = document.querySelector('#message');
 const guitarInterest = document.querySelector('#guitar-interest');
 let selectedGuitar;
+let checkoutGuitar;
+function goToCheckout(model) {
+  checkoutGuitar = guitars.find(guitar => guitar.model === model);
+  if (!checkoutGuitar) return;
+  document.querySelector('#checkout-image').src = checkoutGuitar.image;
+  document.querySelector('#checkout-image').alt = `${checkoutGuitar.brand} ${checkoutGuitar.model}`;
+  document.querySelector('#checkout-brand').textContent = `${checkoutGuitar.brand} · ${checkoutGuitar.type}`;
+  document.querySelector('#checkout-model').textContent = checkoutGuitar.model;
+  document.querySelector('#checkout-price').textContent = checkoutGuitar.price;
+  window.location.hash = 'checkout';
+}
 function goToContact(model) {
   window.location.hash = 'contact';
   guitarInterest.value = model;
@@ -75,6 +86,10 @@ function closeGuitarModal() { modal.hidden = true; document.body.classList.remov
 document.querySelectorAll('.guitar-grid, .inventory-grid').forEach(grid => grid.addEventListener('click', event => {
   const guitarCard = event.target.closest('.guitar-card');
   if (!guitarCard) return;
+  if (event.target.closest('.card-buy')) {
+    goToCheckout(guitarCard.dataset.model);
+    return;
+  }
   if (event.target.closest('.card-contact')) {
     goToContact(guitarCard.dataset.model);
     return;
@@ -87,6 +102,7 @@ document.querySelectorAll('.guitar-grid, .inventory-grid').forEach(grid => grid.
   if (guitarCard && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); openGuitarModal(guitarCard.dataset.model); }
 }));
 document.querySelectorAll('[data-close-modal]').forEach(element => element.addEventListener('click', closeGuitarModal));
+document.querySelector('#modal-buy').addEventListener('click', () => { closeGuitarModal(); goToCheckout(selectedGuitar.model); });
 document.querySelector('#modal-contact').addEventListener('click', () => { closeGuitarModal(); goToContact(selectedGuitar.model); });
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && !modal.hidden) closeGuitarModal(); });
 
@@ -100,7 +116,7 @@ document.querySelectorAll('.brand-tab').forEach(tab => tab.addEventListener('cli
 const views = document.querySelectorAll('.view');
 const navLinks = document.querySelectorAll('.nav-link');
 function showView(viewName) {
-  const target = ['inventory', 'contact', 'staff-inventory'].includes(viewName) ? viewName : 'home';
+  const target = ['inventory', 'contact', 'staff-inventory', 'checkout'].includes(viewName) ? viewName : 'home';
   views.forEach(view => { view.hidden = view.id !== target; });
   navLinks.forEach(link => link.classList.toggle('active', link.dataset.view === target));
   window.scrollTo({top: 0, behavior: 'smooth'});
@@ -143,6 +159,16 @@ inventoryPassword.addEventListener('keydown', event => { if (event.key === 'Ente
 document.querySelector('#inventory-lock').addEventListener('click', lockInventory);
 renderPrivateInventory();
 if (sessionStorage.getItem('inventoryUnlocked') === 'true') { inventoryLogin.hidden = true; inventorySheet.hidden = false; }
+
+document.querySelector('#checkout-form').addEventListener('submit', event => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const formData = new FormData(form);
+  const subject = `Purchase request: ${checkoutGuitar.model}`;
+  const body = [`Guitar: ${checkoutGuitar.model}`, `Price: ${checkoutGuitar.price}`, `Name: ${formData.get('name')}`, `Email: ${formData.get('email')}`, `Phone: ${formData.get('phone')}`, '', 'Shipping or pickup details:', formData.get('address')].join('\n');
+  form.querySelector('.form-status').textContent = 'Opening your email app to send the order request.';
+  window.location.href = `mailto:info@qsloan.net?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+});
 
 document.querySelector('#contact-form').addEventListener('submit', event => {
   event.preventDefault();
