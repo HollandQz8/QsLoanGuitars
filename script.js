@@ -169,7 +169,7 @@ const inventorySheet = document.querySelector('#inventory-sheet');
 const inventoryPassword = document.querySelector('#inventory-password');
 const inventoryLoginStatus = document.querySelector('#inventory-login-status');
 function renderPrivateInventory() {
-  document.querySelector('#inventory-table-body').innerHTML = guitars.map((guitar, index) => `<tr><td>${guitar.serialNumber}</td><td>${guitar.inventoryNumber}</td><td><label class="sold-toggle"><input type="checkbox" data-sold-index="${index}"${guitar.sold ? ' checked' : ''}><span>${guitar.sold ? 'Sold' : 'Available'}</span></label></td><td>${guitar.price}</td><td>${guitar.brand}</td><td>${guitar.condition}</td><td>${guitar.description}</td><td>${guitar.color}</td></tr>`).join('');
+  document.querySelector('#inventory-table-body').innerHTML = guitars.map((guitar, index) => `<tr><td>${guitar.serialNumber}</td><td>${guitar.inventoryNumber}</td><td>${guitar.brand} ${guitar.model}</td><td><label class="sold-toggle"><input type="checkbox" data-sold-index="${index}"${guitar.sold ? ' checked' : ''}><span>${guitar.sold ? 'Sold' : 'Available'}</span></label></td><td>${guitar.price}</td><td>${guitar.brand}</td><td>${guitar.condition}</td><td>${guitar.description}</td><td>${guitar.color}</td></tr>`).join('');
   document.querySelectorAll('[data-sold-index]').forEach(input => input.addEventListener('change', event => {
     const guitar = guitars[Number(event.target.dataset.soldIndex)];
     guitar.sold = event.target.checked;
