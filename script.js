@@ -32,10 +32,20 @@ guitars.forEach((guitar, index) => {
   guitar.recommendedRank = recommendedOrder.indexOf(index);
 });
 
+const clearanceGuitars = Array.from({length: 20}, (_, index) => {
+  const source = guitars[index % guitars.length];
+  const originalPrice = parseInt(source.price.replace(/[$,]/g, ''), 10);
+  const salePrice = Math.round(originalPrice * (index % 3 === 0 ? .7 : index % 3 === 1 ? .75 : .8));
+  return {...source, model: `${source.model} - Clearance ${String(index + 1).padStart(2, '0')}`, price: `$${salePrice.toLocaleString('en-US')}`, originalPrice: source.price, status: 'Clearance', inventoryNumber: `CLR-${String(index + 1).padStart(3, '0')}`};
+});
+const allGuitars = [...guitars, ...clearanceGuitars];
+
 const card = guitar => `<article class="guitar-card" tabindex="0" data-model="${guitar.model}"><div class="guitar-photo"><img src="${guitar.image}" alt="${guitar.brand} ${guitar.model}" loading="lazy"><span class="availability">${guitar.status}</span></div><div class="guitar-info"><div><h3>${guitar.model}</h3><p>${guitar.brand} · ${guitar.type}</p></div><div class="price">${guitar.price}</div></div><div class="card-actions"><button class="card-buy" type="button">Buy now <span>↗</span></button><button class="card-contact" type="button">Ask a question <span>→</span></button></div></article>`;
 const featuredGrid = document.querySelector('#featured-grid');
 const inventoryGrid = document.querySelector('#inventory-grid');
+const clearanceGrid = document.querySelector('#clearance-grid');
 featuredGrid.innerHTML = guitars.slice(0, 3).map(card).join('');
+clearanceGrid.innerHTML = clearanceGuitars.map(card).join('');
 
 let selectedBrand = 'All';
 let selectedSort = 'recommended';
@@ -59,7 +69,7 @@ const guitarInterest = document.querySelector('#guitar-interest');
 let selectedGuitar;
 let checkoutGuitar;
 function goToCheckout(model) {
-  checkoutGuitar = guitars.find(guitar => guitar.model === model);
+  checkoutGuitar = allGuitars.find(guitar => guitar.model === model);
   if (!checkoutGuitar) return;
   document.querySelector('#checkout-image').src = checkoutGuitar.image;
   document.querySelector('#checkout-image').alt = `${checkoutGuitar.brand} ${checkoutGuitar.model}`;
@@ -75,7 +85,7 @@ function goToContact(model) {
   window.setTimeout(() => contactMessage.focus(), 0);
 }
 function openGuitarModal(model) {
-  selectedGuitar = guitars.find(guitar => guitar.model === model);
+  selectedGuitar = allGuitars.find(guitar => guitar.model === model);
   if (!selectedGuitar) return;
   document.querySelector('#modal-image').src = selectedGuitar.images[0];
   document.querySelector('#modal-image').alt = `${selectedGuitar.brand} ${selectedGuitar.model}`;
@@ -137,7 +147,7 @@ document.querySelector('#inventory-sort').addEventListener('change', event => {
 const views = document.querySelectorAll('.view');
 const navLinks = document.querySelectorAll('.nav-link');
 function showView(viewName) {
-  const target = ['inventory', 'contact', 'staff-inventory', 'checkout'].includes(viewName) ? viewName : 'home';
+  const target = ['inventory', 'clearance', 'contact', 'staff-inventory', 'checkout'].includes(viewName) ? viewName : 'home';
   views.forEach(view => { view.hidden = view.id !== target; });
   navLinks.forEach(link => link.classList.toggle('active', link.dataset.view === target));
   window.scrollTo({top: 0, behavior: 'smooth'});
