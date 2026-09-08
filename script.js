@@ -43,7 +43,7 @@ const clearanceGuitars = Array.from({length: 10}, (_, index) => {
 });
 const allGuitars = [...guitars, ...clearanceGuitars];
 
-const card = guitar => `<article class="guitar-card" tabindex="0" data-model="${guitar.model}"><div class="guitar-photo"><img src="${guitar.image}" alt="${guitar.brand} ${guitar.model}" loading="lazy"><span class="availability">${guitar.status}</span></div><div class="guitar-info"><div><h3>${guitar.model}</h3><p>${guitar.brand} · ${guitar.type}</p></div><div class="price">${guitar.originalPrice ? `<del>${guitar.originalPrice}</del> ${guitar.price}` : guitar.price}</div></div><div class="card-actions"><button class="card-buy" type="button">Buy now <span>↗</span></button><button class="card-contact" type="button">Ask a question <span>→</span></button></div></article>`;
+const card = guitar => `<article class="guitar-card" tabindex="0" data-model="${guitar.model}"><div class="guitar-photo"><img src="${guitar.image}" alt="${guitar.brand} ${guitar.model}" loading="lazy"><span class="availability${guitar.sold ? ' sold' : ''}">${guitar.sold ? 'Sold' : guitar.status}</span></div><div class="guitar-info"><div><h3>${guitar.model}</h3><p>${guitar.brand} · ${guitar.type}</p></div><div class="price">${guitar.originalPrice ? `<del>${guitar.originalPrice}</del> ${guitar.price}` : guitar.price}</div></div><div class="card-actions"><button class="card-buy" type="button"${guitar.sold ? ' disabled' : ''}>${guitar.sold ? 'Sold' : 'Buy now'} <span>↗</span></button><button class="card-contact" type="button">Ask a question <span>→</span></button></div></article>`;
 const featuredGrid = document.querySelector('#featured-grid');
 const inventoryGrid = document.querySelector('#inventory-grid');
 const clearanceGrid = document.querySelector('#clearance-grid');
@@ -225,9 +225,11 @@ function lockInventory() {
 document.querySelector('#inventory-login-button').addEventListener('click', unlockInventory);
 inventoryPassword.addEventListener('keydown', event => { if (event.key === 'Enter') unlockInventory(); });
 document.querySelector('#inventory-lock').addEventListener('click', lockInventory);
-const savedSoldStatus = JSON.parse(sessionStorage.getItem('inventorySold') || '[]');
+const savedSoldStatus = JSON.parse(localStorage.getItem('inventorySold') || sessionStorage.getItem('inventorySold') || '[]');
 savedSoldStatus.forEach((sold, index) => { if (guitars[index]) guitars[index].sold = sold; });
 renderPrivateInventory();
+renderInventory();
+featuredGrid.innerHTML = guitars.slice(0, 3).map(card).join('');
 if (sessionStorage.getItem('inventoryUnlocked') === 'true') { inventoryLogin.hidden = true; inventorySheet.hidden = false; }
 
 const posLogin = document.querySelector('#pos-login');
@@ -241,7 +243,17 @@ const posTax = document.querySelector('#pos-tax');
 const posGrandTotal = document.querySelector('#pos-grand-total');
 const posComplete = document.querySelector('#pos-complete');
 const posStatus = document.querySelector('#pos-status');
+const posCustomerName = document.querySelector('#pos-customer-name');
+const posCustomerEmail = document.querySelector('#pos-customer-email');
+const posCustomerPhone = document.querySelector('#pos-customer-phone');
+const posSalesCount = document.querySelector('#pos-sales-count');
+const posRevenue = document.querySelector('#pos-revenue');
+const posAverage = document.querySelector('#pos-average');
+const posCustomerCount = document.querySelector('#pos-customer-count');
+const posCustomers = document.querySelector('#pos-customers');
+const posSales = document.querySelector('#pos-sales');
 let posCart = [];
+let sales = JSON.parse(localStorage.getItem('posSales') || '[]');
 const money = value => `$${value.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 function renderPosProducts() {
   posProduct.innerHTML = '<option value="">Choose an available guitar</option>' + guitars.filter(guitar => !guitar.sold).map((guitar, index) => `<option value="${index}">${guitar.brand} ${guitar.model} · ${guitar.price}</option>`).join('');
@@ -253,8 +265,26 @@ function renderPosCart() {
   posSubtotal.textContent = money(subtotal);
   posTax.textContent = money(tax);
   posGrandTotal.textContent = money(subtotal + tax);
+  document.querySelector('#pos-total').textContent = money(subtotal + tax);
   posComplete.disabled = !posCart.length;
   document.querySelectorAll('[data-remove-pos]').forEach(button => button.addEventListener('click', () => { posCart.splice(Number(button.dataset.removePos), 1); renderPosCart(); }));
+}
+function renderPosAnalytics() {
+  const revenue = sales.reduce((total, sale) => total + sale.total, 0);
+  const customerMap = sales.reduce((map, sale) => {
+    const key = sale.customer.email || sale.customer.phone || sale.customer.name;
+    const customer = map[key] || {...sale.customer, purchases: 0, spent: 0};
+    customer.purchases += sale.items.length;
+    customer.spent += sale.total;
+    map[key] = customer;
+    return map;
+  }, {});
+  posSalesCount.textContent = sales.length;
+  posRevenue.textContent = money(revenue);
+  posAverage.textContent = money(sales.length ? revenue / sales.length : 0);
+  posCustomerCount.textContent = Object.keys(customerMap).length;
+  posCustomers.innerHTML = Object.values(customerMap).map(customer => `<tr><td>${customer.name}</td><td>${customer.email || customer.phone || '—'}</td><td>${customer.purchases}</td><td>${money(customer.spent)}</td></tr>`).join('') || '<tr><td colspan="4">No customer records yet.</td></tr>';
+  posSales.innerHTML = sales.slice().reverse().map(sale => `<tr><td>${new Date(sale.createdAt).toLocaleDateString()}</td><td>${sale.customer.name}</td><td>${sale.items.map(item => item.model).join(', ')}</td><td>${money(sale.total)}</td></tr>`).join('') || '<tr><td colspan="4">No completed sales yet.</td></tr>';
 }
 function unlockPos() {
   if (posPassword.value === '2608') {
@@ -282,15 +312,31 @@ document.querySelector('#pos-add').addEventListener('click', () => {
   if (guitar && !posCart.includes(guitar)) { posCart.push(guitar); posStatus.textContent = ''; renderPosCart(); }
 });
 posComplete.addEventListener('click', () => {
+  if (!posCart.length || !posCustomerName.value.trim() || (!posCustomerEmail.value.trim() && !posCustomerPhone.value.trim())) {
+    posStatus.textContent = 'Add a guitar and a customer name plus email or phone.';
+    return;
+  }
+  const subtotal = posCart.reduce((total, guitar) => total + Number(guitar.price.replace(/[$,]/g, '')), 0);
+  const total = subtotal * 1.06625;
+  sales.push({createdAt: new Date().toISOString(), customer: {name: posCustomerName.value.trim(), email: posCustomerEmail.value.trim(), phone: posCustomerPhone.value.trim()}, items: posCart.map(guitar => ({model: guitar.model, price: guitar.price})), subtotal, total});
+  localStorage.setItem('posSales', JSON.stringify(sales));
   posCart.forEach(guitar => { guitar.sold = true; });
+  localStorage.setItem('inventorySold', JSON.stringify(guitars.map(item => item.sold)));
   sessionStorage.setItem('inventorySold', JSON.stringify(guitars.map(item => item.sold)));
   renderPrivateInventory();
+  renderInventory();
+  featuredGrid.innerHTML = guitars.slice(0, 3).map(card).join('');
   renderPosProducts();
   posCart = [];
   renderPosCart();
+  renderPosAnalytics();
+  posCustomerName.value = '';
+  posCustomerEmail.value = '';
+  posCustomerPhone.value = '';
   posStatus.textContent = 'Sale completed. Inventory has been updated.';
 });
 renderPosCart();
+renderPosAnalytics();
 if (sessionStorage.getItem('posUnlocked') === 'true') { posLogin.hidden = true; posWorkspace.hidden = false; renderPosProducts(); }
 
 document.querySelector('#checkout-form').addEventListener('submit', event => {
