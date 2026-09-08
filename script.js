@@ -10,25 +10,28 @@ const guitars = [
   {brand:'Fender', model:'Vintera II 60s Jazzmaster', year:'2023', color:'Lake placid blue', type:'Electric · 2023', price:'$1,099', image:'https://images.unsplash.com/photo-1558098329-a11cff621064?auto=format&fit=crop&w=800&q=85', status:'Available', description:'Surf-inspired shape, wide tonal range, and a wonderfully expressive tremolo make this Jazzmaster a joy to explore.', details:'Alder body, vintage-style 60s pickups, maple neck, and rhythm/lead circuit.'}
 ];
 
-const additionalImages = [
-  'https://images.unsplash.com/photo-1526040652367-ac003a0475fe?auto=format&fit=crop&w=800&q=85',
-  'https://images.unsplash.com/photo-1556449895-a33c9dba33dd?auto=format&fit=crop&w=800&q=85',
-  'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=85',
-  'https://images.unsplash.com/photo-1499415475580-3b20a7a103f0?auto=format&fit=crop&w=800&q=85',
-  'https://images.unsplash.com/photo-1532294220147-279b6b3a6a78?auto=format&fit=crop&w=800&q=85'
-];
+const guitarPhotoSets = [
+  ['1564186763535-ebb21ef5277f', '1526040652367-ac003a0475fe', '1556449895-a33c9dba33dd', '1510915361894-db8b60106cb1', '1499415475580-3b20a7a103f0'],
+  ['1516924962500-2b4b3b99ea02', '1532294220147-279b6b3a6a78', '1558098329-a11cff621064', '1529518969858-8baa65152fc8', '1543069217-53f2d4b8a5f8'],
+  ['1525201548942-d8732f6617a0', '1605020420620-20c943cc4669', '1498038432885-c6f3f1b912ee', '1550985616-10810253b84d', '1564186763535-ebb21ef5277f'],
+  ['1550985616-10810253b84d', '1543069217-53f2d4b8a5f8', '1516924962500-2b4b3b99ea02', '1556449895-a33c9dba33dd', '1526040652367-ac003a0475fe'],
+  ['1498038432885-c6f3f1b912ee', '1564186763535-ebb21ef5277f', '1510915361894-db8b60106cb1', '1532294220147-279b6b3a6a78', '1499415475580-3b20a7a103f0'],
+  ['1529518969858-8baa65152fc8', '1516924962500-2b4b3b99ea02', '1605020420620-20c943cc4669', '1558098329-a11cff621064', '1543069217-53f2d4b8a5f8'],
+  ['1605020420620-20c943cc4669', '1525201548942-d8732f6617a0', '1526040652367-ac003a0475fe', '1550985616-10810253b84d', '1529518969858-8baa65152fc8'],
+  ['1543069217-53f2d4b8a5f8', '1558098329-a11cff621064', '1498038432885-c6f3f1b912ee', '1510915361894-db8b60106cb1', '1556449895-a33c9dba33dd'],
+  ['1558098329-a11cff621064', '1499415475580-3b20a7a103f0', '1525201548942-d8732f6617a0', '1529518969858-8baa65152fc8', '1516924962500-2b4b3b99ea02']
+].map(photoSet => photoSet.map(photo => `https://images.unsplash.com/photo-${photo}?auto=format&fit=crop&w=900&h=1200&q=88`));
 const conditions = ['Excellent', 'Excellent', 'Very good', 'Excellent', 'Good', 'Very good', 'Excellent', 'Excellent', 'Excellent'];
 const listedDates = ['2026-08-25', '2026-08-18', '2026-08-29', '2026-08-31', '2026-08-21', '2026-08-14', '2026-08-27', '2026-08-23', '2026-09-01'];
 const viewCounts = [184, 239, 316, 128, 207, 161, 276, 198, 352];
 const recommendedOrder = [0, 2, 3, 8, 6, 1, 4, 7, 5];
-const uniformGuitarImage = 'https://images.unsplash.com/photo-1556449895-a33c9dba33dd?auto=format&fit=crop&w=800&q=85';
 guitars.forEach((guitar, index) => {
   guitar.inventoryNumber = `QLG-${String(index + 1).padStart(3, '0')}`;
   guitar.serialNumber = `SN-QLG-${String(index + 1).padStart(3, '0')}`;
   guitar.sold = false;
   guitar.condition = conditions[index];
-  guitar.image = guitar.gallery?.[0] || uniformGuitarImage;
-  guitar.images = guitar.gallery || Array(6).fill(uniformGuitarImage);
+  guitar.images = guitarPhotoSets[index];
+  guitar.image = guitar.images[0];
   guitar.listedAt = listedDates[index];
   guitar.views = viewCounts[index];
   guitar.recommendedRank = recommendedOrder.indexOf(index);
