@@ -226,7 +226,7 @@ document.querySelector('#inventory-login-button').addEventListener('click', unlo
 inventoryPassword.addEventListener('keydown', event => { if (event.key === 'Enter') unlockInventory(); });
 document.querySelector('#inventory-lock').addEventListener('click', lockInventory);
 const savedSoldStatus = JSON.parse(localStorage.getItem('inventorySold') || sessionStorage.getItem('inventorySold') || '[]');
-savedSoldStatus.forEach((sold, index) => { if (guitars[index]) guitars[index].sold = sold; });
+savedSoldStatus.forEach((sold, index) => { if (guitars[index]) { guitars[index].sold = sold; if (sold) guitars[index].status = 'Sold'; } });
 renderPrivateInventory();
 renderInventory();
 featuredGrid.innerHTML = guitars.slice(0, 3).map(card).join('');
@@ -320,7 +320,7 @@ posComplete.addEventListener('click', () => {
   const total = subtotal * 1.06625;
   sales.push({createdAt: new Date().toISOString(), customer: {name: posCustomerName.value.trim(), email: posCustomerEmail.value.trim(), phone: posCustomerPhone.value.trim()}, items: posCart.map(guitar => ({model: guitar.model, price: guitar.price})), subtotal, total});
   localStorage.setItem('posSales', JSON.stringify(sales));
-  posCart.forEach(guitar => { guitar.sold = true; });
+  posCart.forEach(guitar => { guitar.sold = true; guitar.status = 'Sold'; });
   localStorage.setItem('inventorySold', JSON.stringify(guitars.map(item => item.sold)));
   sessionStorage.setItem('inventorySold', JSON.stringify(guitars.map(item => item.sold)));
   renderPrivateInventory();
