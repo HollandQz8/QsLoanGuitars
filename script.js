@@ -178,7 +178,7 @@ document.querySelector('#inventory-sort').addEventListener('change', event => {
 const views = document.querySelectorAll('.view');
 const navLinks = document.querySelectorAll('.nav-link');
 function showView(viewName) {
-  const target = ['inventory', 'clearance', 'service', 'contact', 'staff-inventory', 'checkout'].includes(viewName) ? viewName : 'home';
+  const target = ['inventory', 'clearance', 'service', 'contact', 'staff-inventory', 'pos', 'checkout'].includes(viewName) ? viewName : 'home';
   views.forEach(view => { view.hidden = view.id !== target; });
   navLinks.forEach(link => link.classList.toggle('active', link.dataset.view === target));
   window.scrollTo({top: 0, behavior: 'smooth'});
@@ -229,6 +229,69 @@ const savedSoldStatus = JSON.parse(sessionStorage.getItem('inventorySold') || '[
 savedSoldStatus.forEach((sold, index) => { if (guitars[index]) guitars[index].sold = sold; });
 renderPrivateInventory();
 if (sessionStorage.getItem('inventoryUnlocked') === 'true') { inventoryLogin.hidden = true; inventorySheet.hidden = false; }
+
+const posLogin = document.querySelector('#pos-login');
+const posWorkspace = document.querySelector('#pos-workspace');
+const posPassword = document.querySelector('#pos-password');
+const posLoginStatus = document.querySelector('#pos-login-status');
+const posProduct = document.querySelector('#pos-product');
+const posCartItems = document.querySelector('#pos-cart-items');
+const posSubtotal = document.querySelector('#pos-subtotal');
+const posTax = document.querySelector('#pos-tax');
+const posGrandTotal = document.querySelector('#pos-grand-total');
+const posComplete = document.querySelector('#pos-complete');
+const posStatus = document.querySelector('#pos-status');
+let posCart = [];
+const money = value => `$${value.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+function renderPosProducts() {
+  posProduct.innerHTML = '<option value="">Choose an available guitar</option>' + guitars.filter(guitar => !guitar.sold).map((guitar, index) => `<option value="${index}">${guitar.brand} ${guitar.model} · ${guitar.price}</option>`).join('');
+}
+function renderPosCart() {
+  posCartItems.innerHTML = posCart.length ? posCart.map((guitar, index) => `<div class="pos-cart-item"><div><strong>${guitar.brand} ${guitar.model}</strong><span>${guitar.price}</span></div><button type="button" data-remove-pos="${index}" aria-label="Remove ${guitar.model}">×</button></div>`).join('') : '<p class="pos-empty">No guitars added yet.</p>';
+  const subtotal = posCart.reduce((total, guitar) => total + Number(guitar.price.replace(/[$,]/g, '')), 0);
+  const tax = subtotal * 0.06625;
+  posSubtotal.textContent = money(subtotal);
+  posTax.textContent = money(tax);
+  posGrandTotal.textContent = money(subtotal + tax);
+  posComplete.disabled = !posCart.length;
+  document.querySelectorAll('[data-remove-pos]').forEach(button => button.addEventListener('click', () => { posCart.splice(Number(button.dataset.removePos), 1); renderPosCart(); }));
+}
+function unlockPos() {
+  if (posPassword.value === '2608') {
+    posLogin.hidden = true;
+    posWorkspace.hidden = false;
+    sessionStorage.setItem('posUnlocked', 'true');
+    posLoginStatus.textContent = '';
+    renderPosProducts();
+  } else posLoginStatus.textContent = 'That password is not correct.';
+}
+function lockPos() {
+  posLogin.hidden = false;
+  posWorkspace.hidden = true;
+  posPassword.value = '';
+  posCart = [];
+  sessionStorage.removeItem('posUnlocked');
+  renderPosCart();
+}
+document.querySelector('#pos-login-button').addEventListener('click', unlockPos);
+posPassword.addEventListener('keydown', event => { if (event.key === 'Enter') unlockPos(); });
+document.querySelector('#pos-lock').addEventListener('click', lockPos);
+document.querySelector('#pos-add').addEventListener('click', () => {
+  if (!posProduct.value) { posStatus.textContent = 'Choose a guitar first.'; return; }
+  const guitar = guitars.filter(item => !item.sold)[Number(posProduct.value)];
+  if (guitar && !posCart.includes(guitar)) { posCart.push(guitar); posStatus.textContent = ''; renderPosCart(); }
+});
+posComplete.addEventListener('click', () => {
+  posCart.forEach(guitar => { guitar.sold = true; });
+  sessionStorage.setItem('inventorySold', JSON.stringify(guitars.map(item => item.sold)));
+  renderPrivateInventory();
+  renderPosProducts();
+  posCart = [];
+  renderPosCart();
+  posStatus.textContent = 'Sale completed. Inventory has been updated.';
+});
+renderPosCart();
+if (sessionStorage.getItem('posUnlocked') === 'true') { posLogin.hidden = true; posWorkspace.hidden = false; renderPosProducts(); }
 
 document.querySelector('#checkout-form').addEventListener('submit', event => {
   event.preventDefault();
